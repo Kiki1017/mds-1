@@ -2,11 +2,11 @@
 #'
 #' A dataset containing 535 events reported into the FDA MAUDE database on bone
 #' cement in 2017. Data were obtained via the openFDA API
-#' (\url{https://open.fda.gov/api/}).
+#' (\url{https://open.fda.gov}).
 #'
 #' @format A data frame with 535 rows and 15 variables. Full variable
 #' descriptions may be found on the FDA Device Reference Guide
-#' (\url{https://open.fda.gov/device/event/reference/}). Note that \code{region}
+#' (\url{https://open.fda.gov}). Note that \code{region}
 #' is a simulated variable not present in MAUDE. Descriptions as follows:
 #' \describe{
 #'   \item{report_number}{Identifying number for the adverse event report.}
@@ -55,3 +55,14 @@
 #' }
 #' @source Random normal distribution using \code{rnorm()}.
 "sales"
+
+#' Example List of mds_ts Time Series Objects
+#'
+#' An example list of time series objects (class \code{mds_ts}) generated using
+#' the \code{mds} package.
+#'
+#' @format A list of 3 elements each of class \code{mds_ts}
+#' @source See \code{?maude} and \code{?sales} for source device-event and
+#' exposure data. See \code{?mds::time_series} for how to generate \code{mds_ts}
+#' time series.
+"mds_ts"
