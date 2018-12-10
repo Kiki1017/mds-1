@@ -1,7 +1,7 @@
 Package: mds
 Type: Package
 Title: Medical Devices Surveillance
-Version: 0.2.0
+Version: 0.2.1
 Authors@R: person("Gary", "Chung", email="gchung05@gmail.com",
   role=c("aut", "cre"))
 Maintainer: Gary Chung <gchung05@gmail.com>
@@ -13,13 +13,13 @@ Description: A set of core functions for handling medical device event data in
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 Depends: R (>= 2.10)
-Imports: stats, graphics, parsedate, lubridate
+Imports: stats, parsedate, lubridate
 Suggests: testthat, knitr, rmarkdown
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2018-09-22 05:25:04 UTC; Gary
+Packaged: 2018-12-10 04:19:39 UTC; gchun
 Author: Gary Chung [aut, cre]
 Repository: CRAN
-Date/Publication: 2018-09-26 17:00:08 UTC
+Date/Publication: 2018-12-10 07:00:03 UTC
