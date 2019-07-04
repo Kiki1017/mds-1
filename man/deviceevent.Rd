@@ -6,7 +6,7 @@
 \usage{
 deviceevent(data_frame, time, device_hierarchy, event_hierarchy,
   key = NULL, covariates = NULL, descriptors = NULL,
-  implant_days = NULL)
+  time_invivo = NULL)
 }
 \arguments{
 \item{data_frame}{The input data frame requiring components specified in the
@@ -19,13 +19,15 @@ Example: \code{"event_date"}}
 
 \item{device_hierarchy}{Vector of character variable names representing the
 device hierarchy in \code{data_frame}. Vector ordering is lowest level first,
-most general level last.
+most general level last. If more than 2 variables, see important note in 
+Details.
 
 Example: \code{c("Version", "Device", "ProductLine")}}
 
 \item{event_hierarchy}{Vector of character variable names representing the
 event hierarchy in \code{data_frame}. Vector ordering is most specific event
-category first, most broad event category last.
+category first, most broad event category last. If more than 2 variables,
+see important note in Details.
 
 Example: \code{c("Event Code", "Event Group")}}
 
@@ -37,12 +39,13 @@ Example: \code{"key_ID"}
 Default: \code{NULL} will create a key variable.}
 
 \item{covariates}{Vector of character variable names representing the
-desired covariates to retain \code{"_all_"} includes all covariates, assumed
+desired covariates to retain, all of which must be of class \code{numeric}
+or \code{factor}.  \code{"_all_"} includes all covariates, assumed
 to be remaining variables in \code{data_frame} not already specified in
 \code{key}, \code{time}, \code{device_hierarchy}, or \code{event_hierarchy}.
-It is recommended that covariates are categorical.
+Covariates must be numeric, categorical, or binary in nature.
 
-Example: \code{c("Reporter", "City", "Country")}
+Example: \code{c("Reporter", "Operation Time", "Country")}
 
 Default: \code{NULL} includes no covariates.}
 
@@ -58,13 +61,19 @@ Example: \code{c("Description", "Unique Device Identifier")}
 
 Default: \code{NULL} includes no descriptors.}
 
-\item{implant_days}{Character name of integer variable in \code{data_frame}
-representing the days in vivo of the device at the time of the event
-(\code{time}). More generally, this represents days of exposure of the device
-at the time of the event.
+\item{time_invivo}{Character name of numeric variable in \code{data_frame}
+representing the time in vivo of the device at the time of the event
+\code{time}. See details for more.
 
-Example: \code{"Implant Days"}. For example, a value of \code{45} indicates
-that the implant was in vivo for 45 days at the time of the event.
+IMPORTANT: If a call to \code{define_analyses()} is planned,
+\code{time_invivo} must be in the time units specified collectively by its
+parameters \code{date_level} and \code{date_level_n}.
+
+Example: \code{"Implanted Months"}. A value of \code{45} in the
+variable \code{data_frame$'Implanted Months'} would indicate 45 units of time
+elapsed since the device was first in vivo. If \code{date_level="months"} and
+\code{date_level_n=1}, this will be interpreted by \code{define_analyses()}
+as 45 months.
 
 Default: \code{NULL} indicates this variable will not be used.}
 }
@@ -90,6 +99,19 @@ Rows are deduplicated. Attributes are as follows:
 }
 \description{
 Converts a data frame into a MD-PMS Device Event data frame.
+}
+\details{
+When more than 2 variables are specified in either \code{device_hierarchy} 
+or \code{event_hierarchy}, it is important to note that a subsequent call to
+\code{define_analyses()} currently only utilizes a maximum of 2 variables: 
+the lowest level and the 1-level-up parent. The user may enforce full
+hierarchy in >2 variable cases by ensuring that the parent values are
+uniquely named.
+
+\code{time_invivo} can be thought of more generally as the time of
+exposure of the device to the subject at the time of the event. The common
+usage is duration of the implant in the patient at time of event, for an
+implantable medical device.
 }
 \examples{
 # A barebones dataset

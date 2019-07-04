@@ -1,7 +1,7 @@
 Package: mds
 Type: Package
 Title: Medical Devices Surveillance
-Version: 0.2.1
+Version: 0.3.0
 Authors@R: person("Gary", "Chung", email="gchung05@gmail.com",
   role=c("aut", "cre"))
 Maintainer: Gary Chung <gchung05@gmail.com>
@@ -19,7 +19,7 @@ Imports: stats, parsedate, lubridate
 Suggests: testthat, knitr, rmarkdown
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2018-12-10 04:19:39 UTC; gchun
+Packaged: 2019-07-04 20:18:50 UTC; gchung
 Author: Gary Chung [aut, cre]
 Repository: CRAN
-Date/Publication: 2018-12-10 07:00:03 UTC
+Date/Publication: 2019-07-04 20:40:03 UTC

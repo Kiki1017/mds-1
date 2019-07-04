@@ -12,13 +12,15 @@
 #'
 #' @param device_hierarchy Vector of character variable names representing the
 #' device hierarchy in \code{data_frame}. Vector ordering is lowest level first,
-#' most general level last.
+#' most general level last. If more than 2 variables, see important note in 
+#' Details.
 #'
 #' Example: \code{c("Version", "Device", "ProductLine")}
 #'
 #' @param event_hierarchy Vector of character variable names representing the
 #' event hierarchy in \code{data_frame}. Vector ordering is most specific event
-#' category first, most broad event category last.
+#' category first, most broad event category last. If more than 2 variables,
+#' see important note in Details.
 #'
 #' Example: \code{c("Event Code", "Event Group")}
 #'
@@ -30,12 +32,13 @@
 #' Default: \code{NULL} will create a key variable.
 #'
 #' @param covariates Vector of character variable names representing the
-#' desired covariates to retain \code{"_all_"} includes all covariates, assumed
+#' desired covariates to retain, all of which must be of class \code{numeric}
+#' or \code{factor}.  \code{"_all_"} includes all covariates, assumed
 #' to be remaining variables in \code{data_frame} not already specified in
 #' \code{key}, \code{time}, \code{device_hierarchy}, or \code{event_hierarchy}.
-#' It is recommended that covariates are categorical.
+#' Covariates must be numeric, categorical, or binary in nature.
 #'
-#' Example: \code{c("Reporter", "City", "Country")}
+#' Example: \code{c("Reporter", "Operation Time", "Country")}
 #'
 #' Default: \code{NULL} includes no covariates.
 #'
@@ -51,13 +54,19 @@
 #'
 #' Default: \code{NULL} includes no descriptors.
 #'
-#' @param implant_days Character name of integer variable in \code{data_frame}
-#' representing the days in vivo of the device at the time of the event
-#' (\code{time}). More generally, this represents days of exposure of the device
-#' at the time of the event.
+#' @param time_invivo Character name of numeric variable in \code{data_frame}
+#' representing the time in vivo of the device at the time of the event
+#' \code{time}. See details for more.
 #'
-#' Example: \code{"Implant Days"}. For example, a value of \code{45} indicates
-#' that the implant was in vivo for 45 days at the time of the event.
+#' IMPORTANT: If a call to \code{define_analyses()} is planned,
+#' \code{time_invivo} must be in the time units specified collectively by its
+#' parameters \code{date_level} and \code{date_level_n}.
+#'
+#' Example: \code{"Implanted Months"}. A value of \code{45} in the
+#' variable \code{data_frame$'Implanted Months'} would indicate 45 units of time
+#' elapsed since the device was first in vivo. If \code{date_level="months"} and
+#' \code{date_level_n=1}, this will be interpreted by \code{define_analyses()}
+#' as 45 months.
 #'
 #' Default: \code{NULL} indicates this variable will not be used.
 #'
@@ -79,6 +88,19 @@
 #'   \code{descriptors} with converted variable names correspondingly
 #'   named.}
 #' }
+#'
+#' @details
+#' When more than 2 variables are specified in either \code{device_hierarchy} 
+#' or \code{event_hierarchy}, it is important to note that a subsequent call to
+#' \code{define_analyses()} currently only utilizes a maximum of 2 variables: 
+#' the lowest level and the 1-level-up parent. The user may enforce full
+#' hierarchy in >2 variable cases by ensuring that the parent values are
+#' uniquely named.
+#' 
+#' \code{time_invivo} can be thought of more generally as the time of
+#' exposure of the device to the subject at the time of the event. The common
+#' usage is duration of the implant in the patient at time of event, for an
+#' implantable medical device.
 #'
 #' @examples
 #' # A barebones dataset
@@ -102,7 +124,7 @@ deviceevent <- function(
   key=NULL,
   covariates=NULL,
   descriptors=NULL,
-  implant_days=NULL
+  time_invivo=NULL
 ){
   # Check parameters
   # ----------------
@@ -119,9 +141,9 @@ deviceevent <- function(
                       check_names=data_frame, exclusions="_all_")
   input_param_checker(descriptors, check_class="character",
                       check_names=data_frame, exclusions="_all_")
-  input_param_checker(implant_days, check_class="numeric",
+  input_param_checker(time_invivo, check_class="numeric",
                       check_names=data_frame, max_length=1)
-
+  
   # Address each variable
   # ---------------------
   # Key
@@ -157,14 +179,26 @@ deviceevent <- function(
   }
   if (!is.null(covs)){
     v_cov <- list()
-    for (i in c(1:length(covs))){
-      v_cov[[names(covs)[i]]] <- data_frame[[covs[i]]]
+    # Must drop any covariates that are not numeric or factors
+    a <- unlist(lapply(data_frame[, as.character(covs), drop=F], is.numeric))
+    b <- unlist(lapply(data_frame[, as.character(covs), drop=F], is.factor))
+    if (any(!(a | b))){
+      bad_covs <- names(a)[!(a | b)]
+      warning(paste0("Non-numeric and non-factor covariates moved to descriptors: ",
+                     paste(bad_covs, collapse=", ")))
+      covs <- covs[!as.character(covs) %in% bad_covs]
     }
+    if (length(covs) > 0){
+      for (i in c(1:length(covs))){
+        v_cov[[names(covs)[i]]] <- data_frame[[covs[i]]]
+      }
+    } else covs <- NULL
   }
   # Descriptors
   key_vars <- c(time, device_hierarchy, event_hierarchy)
   if (!is.null(key)) key_vars <- c(key, key_vars)
   if (!is.null(covs)) key_vars <- c(covs, key_vars)
+  if (!is.null(time_invivo)) key_vars <- c(time_invivo, key_vars)
   if (is.null(descriptors)){
     dscr <- NULL
   } else if (all(descriptors == "_all_")){
@@ -180,8 +214,8 @@ deviceevent <- function(
     }
   }
   # Implant Days
-  if (!is.null(implant_days)){
-    v_iday <- list(implant_days=data_frame[[implant_days]])
+  if (!is.null(time_invivo)){
+    v_iday <- list(time_invivo=data_frame[[time_invivo]])
   }
 
   # Assemble data frame
@@ -190,7 +224,7 @@ deviceevent <- function(
     data.frame(key=v_key, time=v_time, stringsAsFactors=F),
     data.frame(v_dev),
     data.frame(v_ev))
-  if (!is.null(implant_days)) dataset <- cbind.data.frame(dataset,
+  if (!is.null(time_invivo)) dataset <- cbind.data.frame(dataset,
                                                           data.frame(v_iday))
   if (!is.null(covs)) dataset <- cbind.data.frame(dataset, data.frame(v_cov))
   if (!is.null(dscr)){
@@ -255,7 +289,7 @@ deviceevent <- function(
                    key=key,
                    covariates=covs,
                    descriptors=dscr,
-                   implant_days=implant_days)
+                   time_invivo=time_invivo)
   class(out) <- append("mds_de", class(out))
 
   return(out)

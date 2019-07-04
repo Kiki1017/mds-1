@@ -18,77 +18,72 @@ time_series(analysis, ...)
 }
 \arguments{
 \item{analysis}{A defined analysis object of class \code{mds_da}, list of
-class \code{mds_das}, or a list of objects each of class \code{mds_da}.}
+class \code{mds_das}, or a list of objects each of class \code{mds_da},
+usually created by \code{define_analyses()}.}
 
 \item{...}{Further arguments for future work.}
 
-\item{deviceevents}{A device-events object of class \code{mds_de}. Typically,
-this will be the same \code{mds_de} object used to generate \code{analysis}.}
+\item{deviceevents}{A device-event data frame of class \code{mds_de}, usually
+created by \code{deviceevent()}. This should be the same data frame used to 
+generate \code{analysis}.}
 
-\item{exposure}{Optional exposure object of class \code{mds_e}. Typically,
-this will be the same \code{mds_e} object used to generate \code{analysis},
-if an exposure was used.
+\item{exposure}{Optional exposure data frame of class \code{mds_e}, usually
+created by \code{exposure()}. This should be the same data frame used to 
+generate \code{analysis}, if exposure data was used.
 
 Default: \code{NULL} will not consider exposure data.}
 
-\item{use_hierarchy}{Logical value indicating whether device and event
-hierarchies should be used in counting contingency tables for
-disproportionality analysis. See details for more.}
+\item{use_hierarchy}{Deprecated - do not use. Logical value indicating 
+whether device and event hierarchies should be used in counting contingency 
+tables for disproportionality analysis.}
 }
 \value{
 A standardized MD-PMS time series data frame of class \code{mds_ts}.
-The data frame contains, by defined date levels, the following:
+
+The data frame contains, by defined date levels, the following columns:
 \describe{
   \item{nA}{Count of the device & event level of interest. If covariate
   analysis is indicated, this will be at the covariate & device level of
   interest.}
-  \item{nB}{Count of the device & non-event, or if covariate analysis,
+  \item{nB}{Optional. Count of the device & non-event, or if covariate analysis,
   covariate & non-device. \code{nB} will be missing if this is an
   \code{'All'} level analysis.}
-  \item{nC}{Count of the non-device & event, or if covariate analysis,
+  \item{nC}{Optional. Count of the non-device & event, or if covariate analysis,
   non-covariate & device. \code{nC} will be missing if this is an
   \code{'All'} level analysis.}
-  \item{nD}{Count of the non-device & non-event, or if covariate analysis,
+  \item{nD}{Optional. Count of the non-device & non-event, or if covariate analysis,
   non-covariate & non-device. \code{nD} will be missing if this is an
   \code{'All'} level analysis.}
   \item{ids}{List of all \code{key}s from \code{deviceevents} constituting
   \code{nA}.}
-  \item{exposure}{Count of exposures applicable to \code{nA}. This counts at
+  \item{exposure}{Optional. Count of exposures applicable to \code{nA}. This counts at
   the device and covariate levels but not at the event level. If a matching
   device and/or covariate level is not found, then \code{exposure} will be
   \code{NA}. The exception is an \code{'All'} level analysis, which counts
   exposures across all levels.}
-  \item{ids_exposure}{List of all exposure keys from \code{exposure}
+  \item{ids_exposure}{Optional. List of all exposure keys from \code{exposure}
   applicable to \code{nA}.}
 }
 
-Attributes are as follows:
+The \code{mds_ts} class attributes are as follows:
 \describe{
-  \item{nA}{Variable name(s) and level(s) (key-value) pair(s) for \code{nA}.}
-  \item{nABCD}{Variable names and levels (key-value) pairs for the entire
-  2x2 contingency table, if applicable to the analysis.}
-  \item{nLabels}{Plain language labels for \code{nA} and, if applicable, the
-  rows and columns of the 2x2 contingency table.}
+  \item{title}{Short description of the analysis.}
+  \item{analysis}{The analysis definition of class \code{mds_da}.}
   \item{exposure}{Boolean of whether exposure counts are present.}
   \item{dpa}{Boolean of whether 2x2 contingency table counts are present
   (presumably for disproportionality analysis or 'DPA').}
+  \item{dpa_detail}{Optional. If \code{dpa} is \code{TRUE}, \code{list} 
+  object containing labels for the DPA contingency table.}
+  \item{covar_data}{Optional. If analysis definition includes covariate level 
+  or time in-vivo, \code{data.frame} object containing the relevant data.}
 }
 }
 \description{
-Converts defined analysis (class \code{mds_da}) to a time series object or a
-list of defined analyses (class \code{mds_das} or \code{list}) to a list of
-time series objects.
-}
-\details{
-When \code{use_hierarchy=T}, the B, C, and D cells of the 2x2
-contingency table count at the next level up in the device and/or event
-hierarchies. For example, if the A cell is counting \code{device_1="Apple"}
-and \code{"Apple"} is the child of the parent \code{device_2="Fruits"}, the
-B cell counts all \code{"Fruits"} not equal to \code{"Apple"}.
-
-When \code{use_hierarchy=F}, the B, C, and D cells of the 2x2 contingency
-table simply count all devices/events/covariate levels not equal to the
-reference cell A.
+Creates time series data frame(s) from defined analysis/analyses
+(\code{define_analyses()}), device-event data frame 
+(\code{deviceevent()}), and optionally, exposure data frame
+(\code{exposure()}). If analysis includes covariates or time in-vivo, creates
+the relevant supporting data frame.
 }
 \section{Methods (by class)}{
 \itemize{
