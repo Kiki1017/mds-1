@@ -1,3 +1,15 @@
+`mds` 0.3.3
+---------------------------------------
+**UNDER DEVELOPMENT - FUTURE RELEASE**
+
+`mds` 0.3.2
+---------------------------------------
+**Implemented Updates**
+
+*Bugfix*
+- Replace `ifelse()` calls that return `Date`s with calls to `ifelse_cp()`
+
+
 `mds` 0.3.1
 ---------------------------------------
 
